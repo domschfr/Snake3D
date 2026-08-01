@@ -6,6 +6,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <random>
 
 #define GL_SILENCE_DEPRECATION
 #include <OpenGL/gl3.h>
@@ -14,7 +15,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-Game::Game() : isRunning(false), window(nullptr), glContext(nullptr), screenWidth(0), screenHeight(0) {
+Game::Game() : isRunning(false), window(nullptr), glContext(nullptr), screenWidth(0), screenHeight(0), isGameOver(false), foodPos() {
 }
 
 Game::~Game() {
@@ -88,6 +89,13 @@ void Game::processInputs() {
 		if (event.type == SDL_KEYDOWN) {
 			if (event.key.keysym.sym == SDLK_ESCAPE)
 				isRunning = false;
+			if (event.key.keysym.sym == SDLK_SPACE && isGameOver) {
+				isGameOver = false;
+				snake.body = {glm::vec3(0.0f, 0.0f, 0.0f)};
+				snake.velocity = glm::vec3(1.0f, 0.0f, 0.0f);
+			}
+			if (isGameOver)
+				continue;
 			if ((event.key.keysym.sym == SDLK_w || event.key.keysym.sym == SDLK_UP) && snake.velocity.z == 0)
 				snake.velocity = glm::vec3(0.0f, 0.0f, -1.0f);
 			if ((event.key.keysym.sym == SDLK_s || event.key.keysym.sym == SDLK_DOWN) && snake.velocity.z == 0)
@@ -101,10 +109,25 @@ void Game::processInputs() {
 }
 
 void Game::update() {
+	if (isGameOver) return;
+
 	uint32_t currentTime = SDL_GetTicks();
 	if (currentTime - lastTickTime >= tickRate) {
 		glm::vec3 nextHead = snake.body.front() + snake.velocity;
-		bool ateFood = glm::distance(nextHead, foodPos) < 0.1f;
+
+		if (static_cast<int>(nextHead.x) > gridBounds || static_cast<int>(nextHead.x) < -gridBounds || static_cast<int>(nextHead.z) > gridBounds || static_cast<int>(nextHead.z) < -gridBounds) {
+			isGameOver = true;
+			return;
+		}
+
+		for (const glm::vec3 &bodySegment : snake.body) {
+			if (nextHead.x == bodySegment.x && nextHead.z == bodySegment.z) {
+				isGameOver = true;
+				return;
+			}
+		}
+
+		bool ateFood = (nextHead.x == foodPos.x && nextHead.z == foodPos.z);
 		snake.update(ateFood);
 		if (ateFood) {
 			spawnFood();
@@ -114,7 +137,7 @@ void Game::update() {
 	}
 }
 
-void Game::render() {
+void Game::render() const {
 	glClearColor(0.2f, 0.25f, 0.3f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -124,7 +147,7 @@ void Game::render() {
 		glm::vec3(0.0f, 30.0f, 10.0f),
 		glm::vec3(0.0f, 0.0f, 0.0f),
 		glm::vec3(0.0f, 1.0f, 0.0f));
-	glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float) screenWidth / (float) screenHeight, 0.1f,
+	glm::mat4 projection = glm::perspective(glm::radians(45.0f), static_cast<float>(screenWidth) / static_cast<float>(screenHeight), 0.1f,
 	                                        100.0f);
 
 	shader->setMat4("view", view);
@@ -154,10 +177,15 @@ void Game::clean() {
 }
 
 void Game::spawnFood() {
+	static std::random_device rd;
+	static std::mt19937 gen(rd());
+
+	std::uniform_int_distribution<int> dist(-gridBounds, gridBounds - 1);
+
 	bool validPos = false;
 	while (!validPos) {
-		float x = (float)((rand() % (gridBounds * 2)) - gridBounds);
-		float z = (float)((rand() % (gridBounds * 2)) - gridBounds);
+		auto x = static_cast<float>(dist(gen));
+		auto z = static_cast<float>(dist(gen));
 		foodPos = glm::vec3(x, 0.0f, z);
 
 		validPos = std::find_if(snake.body.begin(), snake.body.end(), [&](const glm::vec3 &p) {

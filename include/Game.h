@@ -22,7 +22,7 @@ public:
 private:
 	void processInputs();
 	void update();
-	void render();
+	void render() const;
 	void spawnFood();
 
 	bool isRunning;
@@ -34,6 +34,7 @@ private:
 	const uint32_t tickRate = 250;
 	int gridBounds = 10;
 
+	bool isGameOver;
 	Snake snake;
 	std::unique_ptr<Shader> shader;
 	std::unique_ptr<Segment> segment;
