@@ -29,7 +29,7 @@ bool Game::init(const std::string& title, int width, int height) {
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 
-	SDL_Window *window = SDL_CreateWindow(
+	window = SDL_CreateWindow(
 		title.c_str(),
 		SDL_WINDOWPOS_CENTERED,
 		SDL_WINDOWPOS_CENTERED,
@@ -40,8 +40,8 @@ bool Game::init(const std::string& title, int width, int height) {
 		return false;
 	}
 
-	SDL_GLContext gl_context = SDL_GL_CreateContext(window);
-	if (!gl_context) {
+	glContext = SDL_GL_CreateContext(window);
+	if (!glContext) {
 		std::cerr << "OpenGL failed to initialize: " << SDL_GetError() << std::endl;
 		return false;
 	}
