@@ -14,7 +14,6 @@ public:
 	glm::vec3 velocity;
 
 	Snake();
-	~Snake();
 
 	void update();
 };

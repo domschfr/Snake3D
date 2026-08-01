@@ -6,15 +6,13 @@
 #define GAME_H
 
 #include <SDL2/SDL.h>
-#include <string>
 #include "Snake.h"
+#include "Shader.h"
+#include "Segment.h"
+#include <memory>
 
 class Game {
 public:
-	Snake snake;
-	uint32_t lastTickTime = 0;
-	const uint32_t tickRate = 250;
-
 	Game();
 	~Game();
 
@@ -26,20 +24,17 @@ private:
 	void update();
 	void render();
 
-	std::string readFile(const char *filePath);
-
-	void setupShaders();
-	void setupCube();
-	unsigned int compileShader(unsigned int type, const char* source);
-
 	bool isRunning;
-
 	SDL_Window *window;
 	SDL_GLContext glContext;
-
-	unsigned int VAO, VBO, shaderProgram;
-
 	int screenWidth, screenHeight;
+
+	uint32_t lastTickTime = 0;
+	const uint32_t tickRate = 250;
+
+	Snake snake;
+	std::unique_ptr<Shader> shader;
+	std::unique_ptr<Segment> segment;
 };
 
 #endif //GAME_H

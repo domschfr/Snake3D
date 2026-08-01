@@ -8,8 +8,6 @@
 
 Snake::Snake() : body({glm::vec3(0.0f, 0.0f, 0.0f)}), velocity(glm::vec3(1.0f, 0.0f, 0.0f)) {};
 
-Snake::~Snake() = default;
-
 void Snake::update() {
 	glm::vec3 newHead = body.front() + velocity;
 

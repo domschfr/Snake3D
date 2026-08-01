@@ -2,6 +2,8 @@ set(SOURCES
     main.cpp
         Game.cpp
         Snake.cpp
+        Shader.cpp
+        Segment.cpp
 )
 
 add_executable(Snake3D ${SOURCES})
