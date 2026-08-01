@@ -7,9 +7,14 @@
 
 #include <SDL2/SDL.h>
 #include <string>
+#include "Snake.h"
 
 class Game {
 public:
+	Snake snake;
+	uint32_t lastTickTime = 0;
+	const uint32_t tickRate = 250;
+
 	Game();
 	~Game();
 

@@ -168,13 +168,28 @@ void Game::processInputs() {
 		if (event.type == SDL_QUIT) {
 			isRunning = false;
 		}
-		if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE) {
-			isRunning = false;
+		if (event.type == SDL_KEYDOWN) {
+			if (event.key.keysym.sym == SDLK_ESCAPE)
+				isRunning = false;
+			if ((event.key.keysym.sym == SDLK_w || event.key.keysym.sym == SDLK_UP) && snake.velocity.z == 0)
+				snake.velocity = glm::vec3(0.0f, 0.0f, -1.0f);
+			if ((event.key.keysym.sym == SDLK_s || event.key.keysym.sym == SDLK_DOWN) && snake.velocity.z == 0)
+				snake.velocity = glm::vec3(0.0f, 0.0f, 1.0f);
+			if ((event.key.keysym.sym == SDLK_a || event.key.keysym.sym == SDLK_LEFT) && snake.velocity.x == 0)
+				snake.velocity = glm::vec3(-1.0f, 0.0f, 0.0f);
+			if ((event.key.keysym.sym == SDLK_d || event.key.keysym.sym == SDLK_RIGHT) && snake.velocity.x == 0)
+				snake.velocity = glm::vec3(1.0f, 0.0f, 0.0f);
 		}
 	}
 }
 
-void Game::update() {}
+void Game::update() {
+	uint32_t currentTime = SDL_GetTicks();
+	if (currentTime - lastTickTime >= tickRate) {
+		snake.update();
+		lastTickTime = currentTime;
+	}
+}
 
 void Game::render() {
 	glClearColor(0.2f, 0.25f, 0.3f, 1.0f);
@@ -182,11 +197,10 @@ void Game::render() {
 
 	glUseProgram(shaderProgram);
 
-	glm::mat4 model = glm::mat4(1.0f);
-	model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 1.0f, 0.0f));
-
-	glm::mat4 view = glm::mat4(1.0f);
-	view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+	glm::mat4 view = glm::lookAt(
+		glm::vec3(0.0f, 15.0f, 10.0f),
+		glm::vec3(0.0f, 0.0f, 0.0f),
+		glm::vec3(0.0f, 1.0f, 0.0f));
 
 	glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)screenWidth / (float)screenHeight, 0.1f, 100.0f);
 
@@ -194,12 +208,17 @@ void Game::render() {
 	int viewLoc = glGetUniformLocation(shaderProgram, "view");
 	int projectionLoc = glGetUniformLocation(shaderProgram, "projection");
 
-	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 	glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
 	glBindVertexArray(VAO);
-	glDrawArrays(GL_TRIANGLES, 0, 36);
+
+	for (const glm::vec3& segment : snake.body) {
+		glm::mat4 model = glm::translate(glm::mat4(1.0f), segment);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+	}
+
 	glBindVertexArray(0);
 
 	SDL_GL_SwapWindow(window);

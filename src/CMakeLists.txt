@@ -1,6 +1,7 @@
 set(SOURCES
     main.cpp
         Game.cpp
+        Snake.cpp
 )
 
 add_executable(Snake3D ${SOURCES})
