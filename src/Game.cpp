@@ -34,7 +34,7 @@ bool Game::init(const std::string& title, int width, int height) {
 		SDL_WINDOWPOS_CENTERED,
 		SDL_WINDOWPOS_CENTERED,
 		width, height,
-		SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_ALLOW_HIGHDPI);
+		SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
 	if (!window) {
 		std::cerr << "Window failed to initialize: " << SDL_GetError() << std::endl;
 		return false;
@@ -46,17 +46,10 @@ bool Game::init(const std::string& title, int width, int height) {
 		return false;
 	}
 
-	SDL_GL_SetSwapInterval(1);
-
 	std::cout << "Game Engine Initialized Successfully!" << std::endl;
 	std::cout << "Vendor:   " << glGetString(GL_VENDOR) << std::endl;
 	std::cout << "Renderer: " << glGetString(GL_RENDERER) << std::endl;
 	std::cout << "OpenGL Version:  " << glGetString(GL_VERSION) << std::endl;
-
-	// glGetError();
-	// GLuint dummyVAO;
-	// glGenVertexArrays(1, &dummyVAO);
-	// glBindVertexArray(dummyVAO);
 
 	isRunning = true;
 	return true;
@@ -85,11 +78,8 @@ void Game::processInputs() {
 void Game::update() {}
 
 void Game::render() {
-	// int drawableWidth, drawableHeight;
-	// SDL_GL_GetDrawableSize(window, &drawableWidth, &drawableHeight);
-	// glViewport(0, 0, drawableWidth, drawableHeight);
 	glClearColor(0.2f, 0.25f, 0.3f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	SDL_GL_SwapWindow(window);
 }
 
