@@ -21,10 +21,20 @@ private:
 	void update();
 	void render();
 
+	std::string readFile(const char *filePath);
+
+	void setupShaders();
+	void setupCube();
+	unsigned int compileShader(unsigned int type, const char* source);
+
 	bool isRunning;
 
 	SDL_Window *window;
 	SDL_GLContext glContext;
+
+	unsigned int VAO, VBO, shaderProgram;
+
+	int screenWidth, screenHeight;
 };
 
 #endif //GAME_H
