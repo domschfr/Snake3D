@@ -8,9 +8,10 @@
 
 Snake::Snake() : body({glm::vec3(0.0f, 0.0f, 0.0f)}), velocity(glm::vec3(1.0f, 0.0f, 0.0f)) {};
 
-void Snake::update() {
+void Snake::update(bool ateFood) {
 	glm::vec3 newHead = body.front() + velocity;
 
 	body.push_front(newHead);
-	body.pop_back();
+	if (!ateFood)
+		body.pop_back();
 }

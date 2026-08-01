@@ -15,7 +15,7 @@ public:
 
 	Snake();
 
-	void update();
+	void update(bool ateFood);
 };
 
 #endif //SNAKE_H

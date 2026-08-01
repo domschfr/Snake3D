@@ -23,6 +23,7 @@ private:
 	void processInputs();
 	void update();
 	void render();
+	void spawnFood();
 
 	bool isRunning;
 	SDL_Window *window;
@@ -31,10 +32,13 @@ private:
 
 	uint32_t lastTickTime = 0;
 	const uint32_t tickRate = 250;
+	int gridBounds = 10;
 
 	Snake snake;
 	std::unique_ptr<Shader> shader;
 	std::unique_ptr<Segment> segment;
+	glm::vec3 foodPos;
+
 };
 
 #endif //GAME_H

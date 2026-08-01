@@ -65,6 +65,8 @@ bool Game::init(const std::string &title, int width, int height) {
 	shader = std::make_unique<Shader>("assets/shaders/shader.vert", "assets/shaders/shader.frag");
 	segment = std::make_unique<Segment>();
 
+	spawnFood();
+
 	isRunning = true;
 	return true;
 }
@@ -101,7 +103,13 @@ void Game::processInputs() {
 void Game::update() {
 	uint32_t currentTime = SDL_GetTicks();
 	if (currentTime - lastTickTime >= tickRate) {
-		snake.update();
+		glm::vec3 nextHead = snake.body.front() + snake.velocity;
+		bool ateFood = glm::distance(nextHead, foodPos) < 0.1f;
+		snake.update(ateFood);
+		if (ateFood) {
+			spawnFood();
+		}
+
 		lastTickTime = currentTime;
 	}
 }
@@ -113,7 +121,7 @@ void Game::render() {
 	shader->use();
 
 	glm::mat4 view = glm::lookAt(
-		glm::vec3(0.0f, 15.0f, 10.0f),
+		glm::vec3(0.0f, 30.0f, 10.0f),
 		glm::vec3(0.0f, 0.0f, 0.0f),
 		glm::vec3(0.0f, 1.0f, 0.0f));
 	glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float) screenWidth / (float) screenHeight, 0.1f,
@@ -125,6 +133,8 @@ void Game::render() {
 	for (const glm::vec3& bodySegment : snake.body) {
 		segment->draw(*shader, bodySegment);
 	}
+
+	segment->draw(*shader, foodPos);
 
 	SDL_GL_SwapWindow(window);
 }
@@ -141,4 +151,17 @@ void Game::clean() {
 		window = nullptr;
 	}
 	SDL_Quit();
+}
+
+void Game::spawnFood() {
+	bool validPos = false;
+	while (!validPos) {
+		float x = (float)((rand() % (gridBounds * 2)) - gridBounds);
+		float z = (float)((rand() % (gridBounds * 2)) - gridBounds);
+		foodPos = glm::vec3(x, 0.0f, z);
+
+		validPos = std::find_if(snake.body.begin(), snake.body.end(), [&](const glm::vec3 &p) {
+			return p.x == foodPos.x && p.z == foodPos.z;
+		}) == snake.body.end();
+	}
 }
