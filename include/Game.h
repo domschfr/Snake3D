@@ -19,6 +19,8 @@ public:
 	bool init(const std::string& title, int width, int height);
 	void run();
 	void clean();
+
+	bool inMenu;
 private:
 	void processInputs();
 	void update();

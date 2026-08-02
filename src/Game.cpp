@@ -15,7 +15,11 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-Game::Game() : isRunning(false), window(nullptr), glContext(nullptr), screenWidth(0), screenHeight(0), isGameOver(false), foodPos() {
+#include <imgui.h>
+#include <imgui_impl_sdl2.h>
+#include <imgui_impl_opengl3.h>
+
+Game::Game() : isRunning(false), inMenu(true), window(nullptr), glContext(nullptr), screenWidth(0), screenHeight(0), isGameOver(false), foodPos() {
 }
 
 Game::~Game() {
@@ -69,6 +73,14 @@ bool Game::init(const std::string &title, int width, int height) {
 	segment = std::make_unique<Segment>();
 
 	spawnFood();
+
+	//ImGui
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGui::StyleColorsDark();
+
+	ImGui_ImplSDL2_InitForOpenGL(window, glContext);
+	ImGui_ImplOpenGL3_Init("#version 330 core");
 
 	isRunning = true;
 	return true;
