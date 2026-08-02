@@ -3,7 +3,7 @@
 int main(int argc, char *argv[]) {
 	Game game;
 
-	if (game.init("Snake3D", 800, 600)) {
+	if (game.init("Snake3D", 1280, 720)) {
 		game.run();
 	}
 

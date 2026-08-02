@@ -37,7 +37,8 @@ bool Game::init(const std::string &title, int width, int height) {
 
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
 
-	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
+	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 
 	window = SDL_CreateWindow(
@@ -63,6 +64,7 @@ bool Game::init(const std::string &title, int width, int height) {
 	std::cout << "OpenGL Version:  " << glGetString(GL_VERSION) << std::endl;
 
 	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_MULTISAMPLE);
 	shader = std::make_unique<Shader>("assets/shaders/shader.vert", "assets/shaders/shader.frag");
 	segment = std::make_unique<Segment>();
 
@@ -143,8 +145,13 @@ void Game::render() const {
 
 	shader->use();
 
+	shader->setVec3("objectColor", glm::vec3(1.0f, 0.5f, 0.2f));
+	shader->setVec3("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
+	shader->setVec3("lightPos", glm::vec3(0.0f, 10.0f, 0.0f));
+	shader->setVec3("viewPos", glm::vec3(0.0f, 25.0f, 12.0f));
+
 	glm::mat4 view = glm::lookAt(
-		glm::vec3(0.0f, 30.0f, 10.0f),
+		glm::vec3(0.0f, 25.0f, 12.0f),
 		glm::vec3(0.0f, 0.0f, 0.0f),
 		glm::vec3(0.0f, 1.0f, 0.0f));
 	glm::mat4 projection = glm::perspective(glm::radians(45.0f), static_cast<float>(screenWidth) / static_cast<float>(screenHeight), 0.1f,

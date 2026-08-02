@@ -38,11 +38,15 @@ void Shader::use() const {
 	glUseProgram(ID);
 }
 
-void Shader::setMat4(const std::string &name, const glm::mat4 &mat) const {
+void Shader::setMat4(const std::string &name, const glm::mat4 &value) const {
 	int location = glGetUniformLocation(ID, name.c_str());
-	glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(mat));
+	glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(value));
 }
 
+void Shader::setVec3(const std::string &name, const glm::vec3 &value) const {
+	int location = glGetUniformLocation(ID, name.c_str());
+	glUniform3fv(location, 1, glm::value_ptr(value));
+}
 
 std::string Shader::readFile(const char* path) {
 	std::ifstream file(path);
