@@ -82,6 +82,11 @@ bool Game::init(const std::string &title, int width, int height) {
 	ImGui_ImplSDL2_InitForOpenGL(window, glContext);
 	ImGui_ImplOpenGL3_Init("#version 330 core");
 
+	ImGuiStyle &style = ImGui::GetStyle();
+	style.WindowRounding = 10.0f;
+	style.FrameRounding = 5.0f;
+	style.ItemSpacing = ImVec2(10, 10);
+
 	isRunning = true;
 	return true;
 }
@@ -165,10 +170,23 @@ void Game::render() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	if (inMenu) {
-		ImGui::Begin("Main Menu");
+		ImGui::SetNextWindowPos(ImVec2(screenWidth / 2.0f, screenHeight / 2.0f), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
+		ImGui::SetNextWindowSize(ImVec2(300, 200), ImGuiCond_Always);
+		ImGuiWindowFlags flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
+
+		ImGui::Begin("Main Menu", nullptr, flags);
+
+		ImGui::Text("Snake3D");
+
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.8f, 0.2f, 1.0f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.3f, 0.9f, 0.3f, 1.0f));
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(20.0f, 10.0f));
 		if (ImGui::Button("Start Game")) {
 			inMenu = false;
 		}
+		ImGui::PopStyleVar();
+		ImGui::PopStyleColor(2);
+
 		if (ImGui::Button("Quit")) {
 			isRunning = false;
 		}
@@ -220,10 +238,10 @@ void Game::clean() {
 		SDL_GL_DeleteContext(glContext);
 		glContext = nullptr;
 	}
-	if (window) {
-		SDL_DestroyWindow(window);
-		window = nullptr;
-	}
+
+	SDL_DestroyWindow(window);
+	window = nullptr;
+
 	SDL_Quit();
 }
 
