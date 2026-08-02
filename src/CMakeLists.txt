@@ -14,6 +14,7 @@ target_link_libraries(Snake3D PRIVATE
         OpenGL::GL
         SDL2::SDL2
         glm::glm
+        assimp::assimp
 )
 
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD

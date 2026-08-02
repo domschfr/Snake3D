@@ -9,6 +9,7 @@ list(APPEND CMAKE_PREFIX_PATH "/opt/homebrew")
 find_package(OpenGL REQUIRED)
 find_package(SDL2 REQUIRED)
 find_package(glm REQUIRED)
+find_package(assimp REQUIRED)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
