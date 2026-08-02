@@ -106,7 +106,7 @@ void Game::processInputs() {
 		if (!ImGui::GetIO().WantCaptureKeyboard) {
 			if (event.type == SDL_KEYDOWN) {
 				if (event.key.keysym.sym == SDLK_ESCAPE)
-					isRunning = false;
+					inMenu = true;
 				if (event.key.keysym.sym == SDLK_SPACE && isGameOver) {
 					isGameOver = false;
 					snake.body = {glm::vec3(0.0f, 0.0f, 0.0f)};
@@ -208,6 +208,8 @@ void Game::render() {
 }
 
 void Game::clean() {
+	if (!window) return;
+
 	std::cout << "Cleaning up..." << std::endl;
 
 	ImGui_ImplOpenGL3_Shutdown();
