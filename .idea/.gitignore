@@ -6,4 +6,8 @@
 # Datasource local storage ignored files
 /dataSources/
 /dataSources.local.xml
-../.idea
+/editor.xml
+/misc.xml
+/modules.xml
+/Snake3D.iml
+/vcs.xml

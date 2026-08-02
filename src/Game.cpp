@@ -97,27 +97,32 @@ void Game::run() {
 void Game::processInputs() {
 	SDL_Event event;
 	while (SDL_PollEvent(&event)) {
+		ImGui_ImplSDL2_ProcessEvent(&event);
+
 		if (event.type == SDL_QUIT) {
 			isRunning = false;
 		}
-		if (event.type == SDL_KEYDOWN) {
-			if (event.key.keysym.sym == SDLK_ESCAPE)
-				isRunning = false;
-			if (event.key.keysym.sym == SDLK_SPACE && isGameOver) {
-				isGameOver = false;
-				snake.body = {glm::vec3(0.0f, 0.0f, 0.0f)};
-				snake.velocity = glm::vec3(1.0f, 0.0f, 0.0f);
+
+		if (!ImGui::GetIO().WantCaptureKeyboard) {
+			if (event.type == SDL_KEYDOWN) {
+				if (event.key.keysym.sym == SDLK_ESCAPE)
+					isRunning = false;
+				if (event.key.keysym.sym == SDLK_SPACE && isGameOver) {
+					isGameOver = false;
+					snake.body = {glm::vec3(0.0f, 0.0f, 0.0f)};
+					snake.velocity = glm::vec3(1.0f, 0.0f, 0.0f);
+				}
+				if (isGameOver)
+					continue;
+				if ((event.key.keysym.sym == SDLK_w || event.key.keysym.sym == SDLK_UP) && snake.velocity.z == 0)
+					snake.velocity = glm::vec3(0.0f, 0.0f, -1.0f);
+				if ((event.key.keysym.sym == SDLK_s || event.key.keysym.sym == SDLK_DOWN) && snake.velocity.z == 0)
+					snake.velocity = glm::vec3(0.0f, 0.0f, 1.0f);
+				if ((event.key.keysym.sym == SDLK_a || event.key.keysym.sym == SDLK_LEFT) && snake.velocity.x == 0)
+					snake.velocity = glm::vec3(-1.0f, 0.0f, 0.0f);
+				if ((event.key.keysym.sym == SDLK_d || event.key.keysym.sym == SDLK_RIGHT) && snake.velocity.x == 0)
+					snake.velocity = glm::vec3(1.0f, 0.0f, 0.0f);
 			}
-			if (isGameOver)
-				continue;
-			if ((event.key.keysym.sym == SDLK_w || event.key.keysym.sym == SDLK_UP) && snake.velocity.z == 0)
-				snake.velocity = glm::vec3(0.0f, 0.0f, -1.0f);
-			if ((event.key.keysym.sym == SDLK_s || event.key.keysym.sym == SDLK_DOWN) && snake.velocity.z == 0)
-				snake.velocity = glm::vec3(0.0f, 0.0f, 1.0f);
-			if ((event.key.keysym.sym == SDLK_a || event.key.keysym.sym == SDLK_LEFT) && snake.velocity.x == 0)
-				snake.velocity = glm::vec3(-1.0f, 0.0f, 0.0f);
-			if ((event.key.keysym.sym == SDLK_d || event.key.keysym.sym == SDLK_RIGHT) && snake.velocity.x == 0)
-				snake.velocity = glm::vec3(1.0f, 0.0f, 0.0f);
 		}
 	}
 }
@@ -151,38 +156,63 @@ void Game::update() {
 	}
 }
 
-void Game::render() const {
+void Game::render() {
+	ImGui_ImplOpenGL3_NewFrame();
+	ImGui_ImplSDL2_NewFrame();
+	ImGui::NewFrame();
+
 	glClearColor(0.2f, 0.25f, 0.3f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	shader->use();
+	if (inMenu) {
+		ImGui::Begin("Main Menu");
+		if (ImGui::Button("Start Game")) {
+			inMenu = false;
+		}
+		if (ImGui::Button("Quit")) {
+			isRunning = false;
+		}
+		ImGui::End();
+	}
+	else {
+		shader->use();
 
-	shader->setVec3("objectColor", glm::vec3(1.0f, 0.5f, 0.2f));
-	shader->setVec3("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
-	shader->setVec3("lightPos", glm::vec3(0.0f, 10.0f, 0.0f));
-	shader->setVec3("viewPos", glm::vec3(0.0f, 25.0f, 12.0f));
+		shader->setVec3("objectColor", glm::vec3(1.0f, 0.5f, 0.2f));
+		shader->setVec3("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
+		shader->setVec3("lightPos", glm::vec3(0.0f, 10.0f, 0.0f));
+		shader->setVec3("viewPos", glm::vec3(0.0f, 25.0f, 12.0f));
 
-	glm::mat4 view = glm::lookAt(
-		glm::vec3(0.0f, 25.0f, 12.0f),
-		glm::vec3(0.0f, 0.0f, 0.0f),
-		glm::vec3(0.0f, 1.0f, 0.0f));
-	glm::mat4 projection = glm::perspective(glm::radians(45.0f), static_cast<float>(screenWidth) / static_cast<float>(screenHeight), 0.1f,
-	                                        100.0f);
+		glm::mat4 view = glm::lookAt(
+			glm::vec3(0.0f, 25.0f, 12.0f),
+			glm::vec3(0.0f, 0.0f, 0.0f),
+			glm::vec3(0.0f, 1.0f, 0.0f));
+		glm::mat4 projection = glm::perspective(glm::radians(45.0f),
+												static_cast<float>(screenWidth) / static_cast<float>(screenHeight),
+												0.1f,
+												100.0f);
 
-	shader->setMat4("view", view);
-	shader->setMat4("projection", projection);
+		shader->setMat4("view", view);
+		shader->setMat4("projection", projection);
 
-	for (const glm::vec3& bodySegment : snake.body) {
-		segment->draw(*shader, bodySegment);
+		for (const glm::vec3 &bodySegment: snake.body) {
+			segment->draw(*shader, bodySegment);
+		}
+
+		segment->draw(*shader, foodPos);
 	}
 
-	segment->draw(*shader, foodPos);
+	ImGui::Render();
+	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
 	SDL_GL_SwapWindow(window);
 }
 
 void Game::clean() {
 	std::cout << "Cleaning up..." << std::endl;
+
+	ImGui_ImplOpenGL3_Shutdown();
+	ImGui_ImplSDL2_Shutdown();
+	ImGui::DestroyContext();
 
 	if (glContext) {
 		SDL_GL_DeleteContext(glContext);

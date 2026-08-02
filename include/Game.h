@@ -24,7 +24,7 @@ public:
 private:
 	void processInputs();
 	void update();
-	void render() const;
+	void render();
 	void spawnFood();
 
 	bool isRunning;
